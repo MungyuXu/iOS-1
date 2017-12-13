@@ -472,6 +472,10 @@ extension TabViewController: WebEventsDelegate {
         updateSiteRating()
     }
 
+    func webView(_ webView: WKWebView, didChangeUrl url: URL?) {
+        delegate?.tabLoadingStateDidChange(tab: self)
+    }
+
 }
 
 extension TabViewController: UIPopoverPresentationControllerDelegate {

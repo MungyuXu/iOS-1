@@ -25,6 +25,7 @@ open class WebViewController: UIViewController, WKNavigationDelegate, WKUIDelega
     private struct webViewKeyPaths {
         static let estimatedProgress = "estimatedProgress"
         static let hasOnlySecureContent = "hasOnlySecureContent"
+        static let url = "URL"
     }
 
     public weak var webEventsDelegate: WebEventsDelegate?
@@ -79,8 +80,11 @@ open class WebViewController: UIViewController, WKNavigationDelegate, WKUIDelega
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         attachLongPressHandler(webView: webView)
         webView.allowsBackForwardNavigationGestures = true
+
         webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
         webView.addObserver(self, forKeyPath: #keyPath(WKWebView.hasOnlySecureContent), options: .new, context: nil)
+        webView.addObserver(self, forKeyPath: #keyPath(WKWebView.url), options: .new, context: nil)
+
         webView.navigationDelegate = self
         webView.uiDelegate = self
         view.insertSubview(webView, at: 0)
@@ -133,6 +137,9 @@ open class WebViewController: UIViewController, WKNavigationDelegate, WKUIDelega
         case webViewKeyPaths.hasOnlySecureContent:
             webEventsDelegate?.webView(webView, didUpdateHasOnlySecureContent: webView.hasOnlySecureContent)
 
+        case webViewKeyPaths.url:
+            webEventsDelegate?.webView(webView, didChangeUrl: webView.url)
+            
         default:
             Logger.log(text: "Unhandled keyPath \(keyPath)")
         }
@@ -143,6 +150,10 @@ open class WebViewController: UIViewController, WKNavigationDelegate, WKUIDelega
         if let url = url {
             webEventsDelegate?.faviconWasUpdated(favicon, forUrl: url)
         }
+    }
+
+    public func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
+        print("***", #function)
     }
 
     public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
